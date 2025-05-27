@@ -67,6 +67,19 @@ class MemoryDataStore implements DataStoreInterface
     /**
      * {@inheritdoc}
      */
+    public function updateUser(string $userId, string $hashedPassword, string $salt): bool
+    {
+        if (!isset($this->users[$userId])) {
+            return false;
+        }
+        
+        $this->users[$userId] = new UserCredentials($userId, $hashedPassword, $salt);
+        return true;
+    }
+    
+    /**
+     * {@inheritdoc}
+     */
     public function storePasswordResetToken(string $userId, string $resetToken, int $expiresAt): bool
     {
         if (!isset($this->users[$userId])) {

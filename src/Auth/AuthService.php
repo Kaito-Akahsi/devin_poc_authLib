@@ -82,6 +82,18 @@ class AuthService implements AuthInterface
             return new AuthResult(false, ErrorCode::USER_NOT_FOUND);
         }
         
+        // Generate a secure random token
+        $resetToken = bin2hex(random_bytes(32));
+        
+        // Set expiration time (24 hours from now)
+        $expiresAt = time() + 86400;
+        
+        // Store the token in the data store
+        $success = $this->dataStore->storePasswordResetToken($userId, $resetToken, $expiresAt);
+        
+        if (!$success) {
+            return new AuthResult(false, ErrorCode::DATABASE_ERROR);
+        }
         
         return new AuthResult(true);
     }
@@ -106,6 +118,22 @@ class AuthService implements AuthInterface
             return new AuthResult(false, ErrorCode::USER_NOT_FOUND);
         }
         
+        // Verify the reset token
+        $isValidToken = $this->dataStore->verifyPasswordResetToken($userId, $resetToken);
+        if (!$isValidToken) {
+            return new AuthResult(false, ErrorCode::PASSWORD_RESET_INVALID_TOKEN);
+        }
+        
+        $hashResult = $this->passwordHasher->hashPassword($newPassword, 'newSalt');
+        
+        // Update the user's credentials
+        $success = $this->dataStore->updateUser($userId, $hashResult['hashedPassword'], $hashResult['salt']);
+        if (!$success) {
+            return new AuthResult(false, ErrorCode::DATABASE_ERROR);
+        }
+        
+        // Clear the reset token
+        $this->dataStore->clearPasswordResetToken($userId);
         
         return new AuthResult(true);
     }
