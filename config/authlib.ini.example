@@ -1,0 +1,63 @@
+; PHP Authentication Library Configuration Example
+; Copy this file to authlib.ini and modify as needed
+
+; Data store configuration
+; Options: memory, database
+authlib.datastore.type = "database"
+
+; Memory data store configuration
+; Set to 1 to initialize with test data (for development only)
+authlib.datastore.memory.init_test_data = "0"
+
+; Database configuration
+; Driver options: mysql, pgsql
+authlib.datastore.database.driver = "mysql"
+authlib.datastore.database.host = "localhost"
+authlib.datastore.database.port = "3306"
+authlib.datastore.database.dbname = "authlib"
+authlib.datastore.database.username = "authlib_user"
+authlib.datastore.database.password = "secure_password"
+authlib.datastore.database.charset = "utf8mb4"
+
+; Auto-connect to database on initialization
+; Set to 1 to enable, 0 to disable
+authlib.datastore.database.auto_connect = "0"
+
+; Connection pooling configuration (for high-traffic applications)
+; Set to 1 to enable, 0 to disable
+authlib.datastore.database.use_connection_pool = "0"
+authlib.datastore.database.max_connections = "10"
+
+; Password policy configuration
+; Minimum password length
+authlib.password.min_length = "8"
+
+; Password complexity requirements
+; Set to 1 to enable, 0 to disable
+authlib.password.require_uppercase = "1"
+authlib.password.require_lowercase = "1"
+authlib.password.require_numbers = "1"
+authlib.password.require_special_chars = "1"
+
+; Password reset configuration
+; Token expiration time in seconds (default: 24 hours)
+authlib.password_reset.token_expiration = "86400"
+
+; SSO configuration
+; Enabled SSO providers (comma-separated list)
+authlib.sso.enabled_providers = "google,facebook,github"
+
+; Google SSO configuration
+authlib.sso.google.client_id = "your_client_id"
+authlib.sso.google.client_secret = "your_client_secret"
+authlib.sso.google.redirect_uri = "https://example.com/auth/google/callback"
+
+; Facebook SSO configuration
+authlib.sso.facebook.app_id = "your_app_id"
+authlib.sso.facebook.app_secret = "your_app_secret"
+authlib.sso.facebook.redirect_uri = "https://example.com/auth/facebook/callback"
+
+; GitHub SSO configuration
+authlib.sso.github.client_id = "your_client_id"
+authlib.sso.github.client_secret = "your_client_secret"
+authlib.sso.github.redirect_uri = "https://example.com/auth/github/callback"

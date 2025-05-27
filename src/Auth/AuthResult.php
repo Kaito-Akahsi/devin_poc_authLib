@@ -16,17 +16,29 @@ class AuthResult
      * @var int|null Error code if authentication failed
      */
     private ?int $errorCode;
+    
+    /**
+     * @var string|null Error message if authentication failed
+     */
+    private ?string $errorMessage;
 
     /**
      * AuthResult constructor
      *
      * @param bool $isSucceeded Whether authentication succeeded
      * @param int|null $errorCode Error code if authentication failed
+     * @param string|null $errorMessage Custom error message (optional)
      */
-    public function __construct(bool $isSucceeded, ?int $errorCode = null)
+    public function __construct(bool $isSucceeded, ?int $errorCode = null, ?string $errorMessage = null)
     {
         $this->isSucceeded = $isSucceeded;
         $this->errorCode = $errorCode;
+        
+        if ($errorMessage === null && $errorCode !== null) {
+            $this->errorMessage = ErrorCode::getMessage($errorCode);
+        } else {
+            $this->errorMessage = $errorMessage;
+        }
     }
 
     /**
@@ -47,5 +59,15 @@ class AuthResult
     public function getErrorCode(): ?int
     {
         return $this->errorCode;
+    }
+    
+    /**
+     * Get error message if authentication failed
+     *
+     * @return string|null
+     */
+    public function getErrorMessage(): ?string
+    {
+        return $this->errorMessage;
     }
 }

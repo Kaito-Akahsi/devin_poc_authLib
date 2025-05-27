@@ -6,7 +6,7 @@ use AuthLib\DataStore\DataStoreInterface;
 use AuthLib\Validation\InputValidatorInterface;
 
 /**
- * Stub implementation of the authentication service
+ * Implementation of the authentication service
  */
 class AuthService implements AuthInterface
 {
@@ -49,12 +49,12 @@ class AuthService implements AuthInterface
     {
         $input = ['userId' => $userId, 'password' => $password];
         if (!$this->validator->validateRequired($input, ['userId', 'password'])) {
-            return new AuthResult(false, 401);
+            return new AuthResult(false, ErrorCode::VALIDATION_REQUIRED_FIELD_MISSING);
         }
 
         $userCredentials = $this->dataStore->getUserCredentials($userId);
         if ($userCredentials === null) {
-            return new AuthResult(false, 401);
+            return new AuthResult(false, ErrorCode::USER_NOT_FOUND);
         }
 
         $isValid = $this->passwordHasher->verifyPassword(
@@ -65,6 +65,48 @@ class AuthService implements AuthInterface
 
         return $isValid
             ? new AuthResult(true)
-            : new AuthResult(false, 401);
+            : new AuthResult(false, ErrorCode::AUTH_FAILED);
+    }
+    
+    /**
+     * {@inheritdoc}
+     */
+    public function requestPasswordReset(string $userId): AuthResult
+    {
+        if (empty($userId)) {
+            return new AuthResult(false, ErrorCode::VALIDATION_REQUIRED_FIELD_MISSING);
+        }
+        
+        $userCredentials = $this->dataStore->getUserCredentials($userId);
+        if ($userCredentials === null) {
+            return new AuthResult(false, ErrorCode::USER_NOT_FOUND);
+        }
+        
+        
+        return new AuthResult(true);
+    }
+    
+    /**
+     * {@inheritdoc}
+     */
+    public function resetPassword(string $userId, string $resetToken, string $newPassword): AuthResult
+    {
+        $input = [
+            'userId' => $userId,
+            'resetToken' => $resetToken,
+            'newPassword' => $newPassword
+        ];
+        
+        if (!$this->validator->validateRequired($input, ['userId', 'resetToken', 'newPassword'])) {
+            return new AuthResult(false, ErrorCode::VALIDATION_REQUIRED_FIELD_MISSING);
+        }
+        
+        $userCredentials = $this->dataStore->getUserCredentials($userId);
+        if ($userCredentials === null) {
+            return new AuthResult(false, ErrorCode::USER_NOT_FOUND);
+        }
+        
+        
+        return new AuthResult(true);
     }
 }

@@ -13,6 +13,16 @@ class MemoryDataStore implements DataStoreInterface
     private array $users = [];
     
     /**
+     * @var array In-memory storage for password reset tokens
+     */
+    private array $resetTokens = [];
+    
+    /**
+     * @var array In-memory storage for user metadata
+     */
+    private array $userMetadata = [];
+    
+    /**
      * @var array Configuration options
      */
     private array $config;
@@ -38,11 +48,12 @@ class MemoryDataStore implements DataStoreInterface
      * @param string $userId User ID
      * @param string $hashedPassword Hashed password
      * @param string $salt Salt used for hashing
-     * @return void
+     * @return bool Whether the operation was successful
      */
-    public function addUser(string $userId, string $hashedPassword, string $salt): void
+    public function addUser(string $userId, string $hashedPassword, string $salt): bool
     {
         $this->users[$userId] = new UserCredentials($userId, $hashedPassword, $salt);
+        return true;
     }
 
     /**
@@ -51,6 +62,83 @@ class MemoryDataStore implements DataStoreInterface
     public function getUserCredentials(string $userId): ?UserCredentials
     {
         return $this->users[$userId] ?? null;
+    }
+    
+    /**
+     * {@inheritdoc}
+     */
+    public function storePasswordResetToken(string $userId, string $resetToken, int $expiresAt): bool
+    {
+        if (!isset($this->users[$userId])) {
+            return false;
+        }
+        
+        $this->resetTokens[$userId] = [
+            'token' => $resetToken,
+            'expires_at' => $expiresAt
+        ];
+        
+        return true;
+    }
+    
+    /**
+     * {@inheritdoc}
+     */
+    public function verifyPasswordResetToken(string $userId, string $resetToken): bool
+    {
+        if (!isset($this->resetTokens[$userId])) {
+            return false;
+        }
+        
+        $tokenData = $this->resetTokens[$userId];
+        
+        if ($tokenData['expires_at'] < time()) {
+            return false;
+        }
+        
+        return $tokenData['token'] === $resetToken;
+    }
+    
+    /**
+     * {@inheritdoc}
+     */
+    public function clearPasswordResetToken(string $userId): bool
+    {
+        if (!isset($this->resetTokens[$userId])) {
+            return false;
+        }
+        
+        unset($this->resetTokens[$userId]);
+        return true;
+    }
+    
+    /**
+     * {@inheritdoc}
+     */
+    public function storeUserMetadata(string $userId, string $key, $value): bool
+    {
+        if (!isset($this->users[$userId])) {
+            return false;
+        }
+        
+        if (!isset($this->userMetadata[$userId])) {
+            $this->userMetadata[$userId] = [];
+        }
+        
+        $this->userMetadata[$userId][$key] = $value;
+        return true;
+    }
+    
+    /**
+     * {@inheritdoc}
+     */
+    public function getUserMetadata(string $userId, string $key)
+    {
+        if (!isset($this->userMetadata[$userId]) || !isset($this->userMetadata[$userId][$key])) {
+            return null;
+        }
+        
+        return $this->userMetadata[$userId][$key];
     }
     
     /**
