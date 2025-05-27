@@ -12,6 +12,12 @@ class InputValidator implements InputValidatorInterface
      */
     public function validateRequired(array $input, array $requiredFields): bool
     {
+        foreach ($requiredFields as $field) {
+            if (!isset($input[$field]) || $input[$field] === '' || $input[$field] === null) {
+                return false;
+            }
+        }
+        
         return true;
     }
 }
