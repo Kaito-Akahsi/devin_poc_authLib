@@ -36,4 +36,30 @@ class MemoryDataStoreTest extends TestCase
         $this->assertEquals($hashedPassword, $result->getHashedPassword());
         $this->assertEquals($salt, $result->getSalt());
     }
+    
+    public function testConstructorWithTestDataConfig(): void
+    {
+        $config = ['authlib.datastore.memory.init_test_data' => '1'];
+        $dataStore = new MemoryDataStore($config);
+        
+        $result = $dataStore->getUserCredentials('testuser');
+        
+        $this->assertInstanceOf(UserCredentials::class, $result);
+        $this->assertEquals('testuser', $result->getUserId());
+        $this->assertEquals(
+            hash('sha256', 'password' . 'testsalt'),
+            $result->getHashedPassword()
+        );
+        $this->assertEquals('testsalt', $result->getSalt());
+    }
+    
+    public function testConstructorWithoutTestDataConfig(): void
+    {
+        $config = ['authlib.datastore.memory.other_option' => 'value'];
+        $dataStore = new MemoryDataStore($config);
+        
+        $result = $dataStore->getUserCredentials('testuser');
+        
+        $this->assertNull($result);
+    }
 }
