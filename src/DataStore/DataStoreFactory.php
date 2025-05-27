@@ -29,7 +29,9 @@ class DataStoreFactory
     {
         $this->configReader = $configReader;
         
+        // Register default data store types
         $this->registerDataStore('memory', MemoryDataStore::class);
+        $this->registerDataStore('database', DatabaseDataStore::class);
     }
     
     /**
@@ -61,6 +63,12 @@ class DataStoreFactory
         $className = $this->dataStores[$type];
         
         $config = $this->configReader->getConfigByPrefix("authlib.datastore.{$type}.");
+        
+        // If database type, also include database configuration
+        if ($type === 'database') {
+            $dbConfig = $this->configReader->getConfigByPrefix("authlib.datastore.database.");
+            $config = array_merge($config, $dbConfig);
+        }
         
         return new $className($config);
     }
