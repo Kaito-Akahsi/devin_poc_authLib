@@ -20,9 +20,9 @@ interface AuthInterface
      * Request a password reset for a user
      * 
      * @param string $userId User ID
-     * @return AuthResult Result of the password reset request
+     * @return PasswordResetResult Result of the password reset request
      */
-    public function requestPasswordReset(string $userId): AuthResult;
+    public function requestPasswordReset(string $userId): PasswordResetResult;
     
     /**
      * Reset a user's password using a reset token
@@ -30,7 +30,7 @@ interface AuthInterface
      * @param string $userId User ID
      * @param string $resetToken Password reset token
      * @param string $newPassword New password
-     * @return AuthResult Result of the password reset operation
+     * @return PasswordResetResponse Result of the password reset operation
      */
-    public function resetPassword(string $userId, string $resetToken, string $newPassword): AuthResult;
+    public function resetPassword(string $userId, string $resetToken, string $newPassword): PasswordResetResponse;
 }
