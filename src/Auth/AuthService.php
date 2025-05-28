@@ -2,6 +2,7 @@
 
 namespace AuthLib\Auth;
 
+use AuthLib\Config\ConfigReader;
 use AuthLib\DataStore\DataStoreInterface;
 use AuthLib\Validation\InputValidatorInterface;
 
@@ -24,6 +25,11 @@ class AuthService implements AuthInterface
      * @var PasswordHasher
      */
     private PasswordHasher $passwordHasher;
+    
+    /**
+     * @var ConfigReader
+     */
+    private ConfigReader $configReader;
 
     /**
      * AuthService constructor
@@ -35,11 +41,13 @@ class AuthService implements AuthInterface
     public function __construct(
         DataStoreInterface $dataStore,
         InputValidatorInterface $validator,
-        PasswordHasher $passwordHasher
+        PasswordHasher $passwordHasher,
+        ConfigReader $configReader
     ) {
         $this->dataStore = $dataStore;
         $this->validator = $validator;
         $this->passwordHasher = $passwordHasher;
+        $this->configReader = $configReader;
     }
 
     /**

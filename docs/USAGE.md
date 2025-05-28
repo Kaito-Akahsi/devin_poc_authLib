@@ -37,16 +37,20 @@ use AuthLib\DataStore\DataStoreFactory;
 use AuthLib\Validation\InputValidator;
 use AuthLib\Auth\PasswordHasher;
 use AuthLib\Auth\SaltGenerator;
+use AuthLib\Config\ConfigLoader;
 use AuthLib\Config\ConfigReader;
 
 // Create dependencies
-$dataStore = DataStoreFactory::create(ConfigReader::getConfigByPrefix('authlib.datastore.'));
+$configLoader = new ConfigLoader();
+$configReader = new ConfigReader($configLoader);
+$dataStoreFactory = new DataStoreFactory($configReader);
+$dataStore = $dataStoreFactory->createDataStore();
 $validator = new InputValidator();
 $saltGenerator = new SaltGenerator();
 $passwordHasher = new PasswordHasher($saltGenerator);
 
 // Create auth service
-$authService = new AuthService($dataStore, $validator, $passwordHasher);
+$authService = new AuthService($dataStore, $validator, $passwordHasher, $configReader);
 
 // Use the auth service
 $result = $authService->login('username', 'password');
