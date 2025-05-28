@@ -28,6 +28,11 @@ class ErrorCode
     public const USER_NOT_FOUND = 404;
     
     /**
+     * User already exists
+     */
+    public const USER_ALREADY_EXISTS = 409;
+    
+    /**
      * Input validation error
      */
     public const VALIDATION_ERROR = 422;
@@ -115,6 +120,7 @@ class ErrorCode
             self::AUTH_GENERAL_ERROR => 'Authentication error',
             self::AUTH_FAILED => 'Authentication failed',
             self::USER_NOT_FOUND => 'User not found',
+            self::USER_ALREADY_EXISTS => 'User already exists',
             self::VALIDATION_ERROR => 'Validation error',
             self::VALIDATION_REQUIRED_FIELD_MISSING => 'Required field missing',
             self::VALIDATION_INVALID_FORMAT => 'Invalid input format',

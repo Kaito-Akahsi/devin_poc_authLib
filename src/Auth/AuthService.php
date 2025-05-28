@@ -137,4 +137,35 @@ class AuthService implements AuthInterface
         
         return new PasswordResetResponse(true);
     }
+    
+    /**
+     * {@inheritdoc}
+     */
+    public function addUser(string $userId, string $password): AuthResult
+    {
+        $input = ['userId' => $userId, 'password' => $password];
+        if (!$this->validator->validateRequired($input, ['userId', 'password'])) {
+            return new AuthResult(false, ErrorCode::VALIDATION_REQUIRED_FIELD_MISSING);
+        }
+        
+        $userCredentials = $this->dataStore->getUserCredentials($userId);
+        
+        if ($userCredentials !== null) {
+            return new AuthResult(false, ErrorCode::USER_ALREADY_EXISTS);
+        }
+        
+        $hashResult = $this->passwordHasher->hashPassword($password);
+        
+        $success = $this->dataStore->addUser(
+            $userId, 
+            $hashResult['hashedPassword'], 
+            $hashResult['salt']
+        );
+        
+        if (!$success) {
+            return new AuthResult(false, ErrorCode::DATABASE_ERROR);
+        }
+        
+        return new AuthResult(true);
+    }
 }
