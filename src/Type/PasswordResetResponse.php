@@ -3,30 +3,30 @@
 namespace AuthLib\Auth;
 
 /**
- * Class representing the result of an authentication attempt
+ * Class representing the response of a password reset operation
  */
-class AuthResult
+class PasswordResetResponse
 {
     /**
-     * @var bool Whether the authentication was successful
+     * @var bool Whether the password reset was successful
      */
     private bool $isSucceeded;
 
     /**
-     * @var int|null Error code if authentication failed
+     * @var int|null Error code if reset failed
      */
     private ?int $errorCode;
     
     /**
-     * @var string|null Error message if authentication failed
+     * @var string|null Error message if reset failed
      */
     private ?string $errorMessage;
 
     /**
-     * AuthResult constructor
+     * PasswordResetResponse constructor
      *
-     * @param bool $isSucceeded Whether authentication succeeded
-     * @param int|null $errorCode Error code if authentication failed
+     * @param bool $isSucceeded Whether reset succeeded
+     * @param int|null $errorCode Error code if reset failed
      * @param string|null $errorMessage Custom error message (optional)
      */
     public function __construct(bool $isSucceeded, ?int $errorCode = null, ?string $errorMessage = null)
@@ -42,7 +42,7 @@ class AuthResult
     }
 
     /**
-     * Get whether authentication succeeded
+     * Get whether reset succeeded
      *
      * @return bool
      */
@@ -52,7 +52,7 @@ class AuthResult
     }
 
     /**
-     * Get error code if authentication failed
+     * Get error code if reset failed
      *
      * @return int|null
      */
@@ -62,7 +62,7 @@ class AuthResult
     }
     
     /**
-     * Get error message if authentication failed
+     * Get error message if reset failed
      *
      * @return string|null
      */
