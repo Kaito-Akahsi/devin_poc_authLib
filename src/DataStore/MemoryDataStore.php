@@ -43,12 +43,7 @@ class MemoryDataStore implements DataStoreInterface
     }
 
     /**
-     * Add user credentials to the in-memory store
-     *
-     * @param string $userId User ID
-     * @param string $hashedPassword Hashed password
-     * @param string $salt Salt used for hashing
-     * @return bool Whether the operation was successful
+     * {@inheritdoc}
      */
     public function addUser(string $userId, string $hashedPassword, string $salt): bool
     {

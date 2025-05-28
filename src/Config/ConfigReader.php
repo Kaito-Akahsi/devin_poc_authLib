@@ -50,10 +50,10 @@ class ConfigReader
      *
      * @param ConfigLoader $configLoader
      */
-    public function __construct(ConfigLoader $configLoader = null)
+    public function __construct(array $config)
     {
-        if ($configLoader !== null) {
-            $this->config = $configLoader->loadFromIniFile('php.ini');
+        if ($config !== null) {
+            $this->config = $config;
         }
     }
     

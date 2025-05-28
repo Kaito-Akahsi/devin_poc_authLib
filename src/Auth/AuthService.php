@@ -132,7 +132,7 @@ class AuthService implements AuthInterface
             return new PasswordResetResponse(false, ErrorCode::PASSWORD_RESET_INVALID_TOKEN);
         }
         
-        $hashResult = $this->passwordHasher->hashPassword($newPassword, 'newSalt');
+        $hashResult = $this->passwordHasher->hashPassword($newPassword);
         
         // Update the user's credentials
         $success = $this->dataStore->updateUser($userId, $hashResult['hashedPassword'], $hashResult['salt']);
