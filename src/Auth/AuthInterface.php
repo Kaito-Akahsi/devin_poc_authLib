@@ -33,4 +33,13 @@ interface AuthInterface
      * @return PasswordResetResponse Result of the password reset operation
      */
     public function resetPassword(string $userId, string $resetToken, string $newPassword): PasswordResetResponse;
+    
+    /**
+     * Add a new user to the system
+     * 
+     * @param string $userId User ID
+     * @param string $password Password
+     * @return AuthResult Result of the user addition operation
+     */
+    public function addUser(string $userId, string $password): AuthResult;
 }
