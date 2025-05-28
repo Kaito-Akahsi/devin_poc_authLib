@@ -40,8 +40,7 @@ use AuthLib\Auth\SaltGenerator;
 use AuthLib\Config\ConfigReader;
 
 // Create dependencies
-$configReader = new ConfigReader();
-$dataStore = DataStoreFactory::create($configReader->getConfigByPrefix('authlib.datastore.'));
+$dataStore = DataStoreFactory::create(ConfigReader::getConfigByPrefix('authlib.datastore.'));
 $validator = new InputValidator();
 $saltGenerator = new SaltGenerator();
 $passwordHasher = new PasswordHasher($saltGenerator);

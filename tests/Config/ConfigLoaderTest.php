@@ -8,14 +8,12 @@ use PHPUnit\Framework\TestCase;
 
 class ConfigLoaderTest extends TestCase
 {
-    private $configReader;
     private $configLoader;
     private $tempFile;
 
     protected function setUp(): void
     {
-        $this->configReader = $this->createMock(ConfigReader::class);
-        $this->configLoader = new ConfigLoader($this->configReader);
+        $this->configLoader = new ConfigLoader();
         
         $this->tempFile = tempnam(sys_get_temp_dir(), 'authlib_test_');
         file_put_contents($this->tempFile, "authlib.test.key = value\nauthlib.datastore.type = memory");
@@ -45,7 +43,7 @@ class ConfigLoaderTest extends TestCase
     public function testLoadFromIniFileInvalidFile(): void
     {
         $invalidFile = tempnam(sys_get_temp_dir(), 'authlib_invalid_');
-        file_put_contents($invalidFile, "invalid ini content\n=====");
+        file_put_contents($invalidFile, "[section\nkey = \"unclosed string\n[broken");
         
         $result = $this->configLoader->loadFromIniFile($invalidFile);
         

@@ -8,18 +8,10 @@ namespace AuthLib\Config;
 class ConfigLoader
 {
     /**
-     * @var ConfigReader
-     */
-    private ConfigReader $configReader;
-    
-    /**
      * ConfigLoader constructor
-     *
-     * @param ConfigReader $configReader
      */
-    public function __construct(ConfigReader $configReader)
+    public function __construct()
     {
-        $this->configReader = $configReader;
     }
     
     /**
@@ -34,9 +26,13 @@ class ConfigLoader
             return false;
         }
         
-        $config = parse_ini_file($filePath, false, INI_SCANNER_NORMAL);
-        
-        if ($config === false) {
+        try {
+            $config = parse_ini_file($filePath, false, INI_SCANNER_NORMAL);
+            
+            if ($config === false) {
+                return false;
+            }
+        } catch (\Throwable $e) {
             return false;
         }
         

@@ -4,6 +4,7 @@ namespace AuthLib\Tests\Auth;
 
 use AuthLib\Auth\AuthResult;
 use AuthLib\Auth\AuthService;
+use AuthLib\Auth\ErrorCode;
 use AuthLib\Auth\PasswordHasher;
 use AuthLib\DataStore\DataStoreInterface;
 use AuthLib\DataStore\UserCredentials;
@@ -46,7 +47,7 @@ class AuthServiceTest extends TestCase
         $result = $this->authService->login('', '');
         
         $this->assertFalse($result->isSucceeded());
-        $this->assertEquals(401, $result->getErrorCode());
+        $this->assertEquals(ErrorCode::VALIDATION_REQUIRED_FIELD_MISSING, $result->getErrorCode());
     }
     
     public function testLoginFailsWithNonExistentUser(): void
@@ -57,7 +58,7 @@ class AuthServiceTest extends TestCase
         $result = $this->authService->login('nonExistentUser', 'password');
         
         $this->assertFalse($result->isSucceeded());
-        $this->assertEquals(401, $result->getErrorCode());
+        $this->assertEquals(ErrorCode::USER_NOT_FOUND, $result->getErrorCode());
     }
     
     public function testLoginFailsWithInvalidPassword(): void
@@ -74,7 +75,7 @@ class AuthServiceTest extends TestCase
         $result = $this->authService->login('existingUser', 'wrongPassword');
         
         $this->assertFalse($result->isSucceeded());
-        $this->assertEquals(401, $result->getErrorCode());
+        $this->assertEquals(ErrorCode::AUTH_FAILED, $result->getErrorCode());
     }
     
     public function testLoginSucceedsWithValidCredentials(): void

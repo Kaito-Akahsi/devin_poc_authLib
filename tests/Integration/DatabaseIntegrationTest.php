@@ -26,7 +26,6 @@ class DatabaseIntegrationTest extends TestCase
 {
     private $authService;
     private $dataStore;
-    private $configReader;
     private $configLoader;
     
     protected function setUp(): void
@@ -36,15 +35,14 @@ class DatabaseIntegrationTest extends TestCase
             'Configure the database in config/authlib.ini and remove this skip to run it.'
         );
         
-        $this->configReader = new ConfigReader();
-        $this->configLoader = new ConfigLoader($this->configReader);
+        $this->configLoader = new ConfigLoader();
         
         $configFile = __DIR__ . '/../../config/authlib.ini';
         $this->configLoader->loadFromIniFile($configFile);
         
         ini_set('authlib.datastore.type', 'database');
         
-        $dataStoreFactory = new DataStoreFactory($this->configReader);
+        $dataStoreFactory = new DataStoreFactory();
         $this->dataStore = $dataStoreFactory->createDataStore();
         
         $this->assertInstanceOf(DatabaseDataStore::class, $this->dataStore);
