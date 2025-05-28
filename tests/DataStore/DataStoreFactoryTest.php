@@ -2,6 +2,7 @@
 
 namespace AuthLib\Tests\DataStore;
 
+use AuthLib\Config\ConfigLoader;
 use AuthLib\Config\ConfigReader;
 use AuthLib\DataStore\DataStoreFactory;
 use AuthLib\DataStore\DataStoreInterface;
@@ -12,52 +13,22 @@ use PHPUnit\Framework\TestCase;
 class DataStoreFactoryTest extends TestCase
 {
     private $factory;
-    private $originalGetConfig;
-    private $originalGetConfigByPrefix;
-    private $configValues = [];
-    private $configPrefixValues = [];
+    private $configReader;
 
     protected function setUp(): void
     {
-        $this->factory = new DataStoreFactory();
-        
-        $this->originalGetConfig = function_exists('AuthLib\Config\ConfigReader::getConfig') 
-            ? 'AuthLib\Config\ConfigReader::getConfig' 
-            : null;
-        $this->originalGetConfigByPrefix = function_exists('AuthLib\Config\ConfigReader::getConfigByPrefix') 
-            ? 'AuthLib\Config\ConfigReader::getConfigByPrefix' 
-            : null;
-            
-        $this->configValues = [
-            'authlib.datastore.type' => 'memory'
-        ];
-        
-        $this->configPrefixValues = [
-            'authlib.datastore.memory.' => [],
-            'authlib.datastore.database.' => [],
-            'authlib.datastore.custom.' => []
-        ];
-        
-        $this->setUpStaticMethodOverrides();
-    }
-    
-    protected function tearDown(): void
-    {
-        $this->restoreStaticMethodOverrides();
-    }
-    
-    private function setUpStaticMethodOverrides()
-    {
-        
-    }
-    
-    private function restoreStaticMethodOverrides()
-    {
+        $this->configReader = $this->createMock(ConfigReader::class);
+        $this->factory = new DataStoreFactory($this->configReader);
     }
 
     public function testCreateDataStoreWithDefaultType(): void
     {
-        $this->configValues['authlib.datastore.type'] = 'memory';
+        $this->configReader->method('getConfig')
+            ->with('authlib.datastore.type', 'memory')
+            ->willReturn('memory');
+            
+        $this->configReader->method('getConfigByPrefix')
+            ->willReturn([]);
         
         $dataStore = $this->factory->createDataStore();
         
@@ -67,11 +38,14 @@ class DataStoreFactoryTest extends TestCase
     
     public function testCreateDataStoreWithInvalidType(): void
     {
+        $this->configReader->method('getConfig')
+            ->with('authlib.datastore.type', 'memory')
+            ->willReturn('invalid_type');
+            
+        $this->expectException(InvalidArgumentException::class);
+        $this->expectExceptionMessage('Invalid data store type: invalid_type');
         
-        $this->factory->registerDataStore('valid_type', MemoryDataStore::class);
-        
-        
-        $this->markTestSkipped('Cannot easily test with static methods');
+        $dataStore = $this->factory->createDataStore();
     }
     
     public function testRegisterAndCreateCustomDataStore(): void
@@ -81,6 +55,16 @@ class DataStoreFactoryTest extends TestCase
         
         $this->factory->registerDataStore('custom', $customDataStoreClass);
         
-        $this->markTestSkipped('Cannot easily test with static methods');
+        $this->configReader->method('getConfig')
+            ->with('authlib.datastore.type', 'memory')
+            ->willReturn('custom');
+            
+        $this->configReader->method('getConfigByPrefix')
+            ->willReturn([]);
+        
+        $dataStore = $this->factory->createDataStore();
+        
+        $this->assertInstanceOf(DataStoreInterface::class, $dataStore);
+        $this->assertInstanceOf($customDataStoreClass, $dataStore);
     }
 }

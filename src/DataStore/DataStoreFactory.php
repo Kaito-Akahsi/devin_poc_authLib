@@ -16,10 +16,19 @@ class DataStoreFactory
     private array $dataStores = [];
     
     /**
-     * DataStoreFactory constructor
+     * @var ConfigReader
      */
-    public function __construct()
+    private ConfigReader $configReader;
+    
+    /**
+     * DataStoreFactory constructor
+     * 
+     * @param ConfigReader $configReader
+     */
+    public function __construct(ConfigReader $configReader)
     {
+        $this->configReader = $configReader;
+        
         // Register default data store types
         $this->registerDataStore('memory', MemoryDataStore::class);
         $this->registerDataStore('database', DatabaseDataStore::class);
@@ -45,7 +54,7 @@ class DataStoreFactory
      */
     public function createDataStore(): DataStoreInterface
     {
-        $type = ConfigReader::getConfig('authlib.datastore.type', 'memory');
+        $type = $this->configReader->getConfig('authlib.datastore.type', 'memory');
         
         if (!isset($this->dataStores[$type])) {
             throw new InvalidArgumentException("Invalid data store type: {$type}");
@@ -53,11 +62,11 @@ class DataStoreFactory
         
         $className = $this->dataStores[$type];
         
-        $config = ConfigReader::getConfigByPrefix("authlib.datastore.{$type}.");
+        $config = $this->configReader->getConfigByPrefix("authlib.datastore.{$type}.");
         
         // If database type, also include database configuration
         if ($type === 'database') {
-            $dbConfig = ConfigReader::getConfigByPrefix("authlib.datastore.database.");
+            $dbConfig = $this->configReader->getConfigByPrefix("authlib.datastore.database.");
             $config = array_merge($config, $dbConfig);
         }
         

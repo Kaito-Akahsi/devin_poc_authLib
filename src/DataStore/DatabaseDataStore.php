@@ -81,7 +81,8 @@ class DatabaseDataStore implements DataStoreInterface
         $password = $this->config['authlib.datastore.database.password'] ?? '';
         $charset = $this->config['authlib.datastore.database.charset'] ?? 'utf8mb4';
         
-        $dsn = "{$this->driver}:host={$host};port={$port};dbname={$dbname};charset={$charset}";
+        // $dsn = "{$this->driver}:host={$host};port={$port};dbname={$dbname};charset={$charset}";
+        $dsn = "{$this->driver}:host={$host};port={$port};dbname={$dbname}";
         
         $options = [
             PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
@@ -131,12 +132,7 @@ class DatabaseDataStore implements DataStoreInterface
     }
     
     /**
-     * Add a new user to the database
-     *
-     * @param string $userId User ID
-     * @param string $hashedPassword Hashed password
-     * @param string $salt Salt used for hashing
-     * @return bool Whether the operation was successful
+     * {@inheritdoc}
      */
     public function addUser(string $userId, string $hashedPassword, string $salt): bool
     {
@@ -220,16 +216,17 @@ class DatabaseDataStore implements DataStoreInterface
         }
         
         $this->clearPasswordResetToken($userId);
-        
+        $expiresAtDateTime = date('Y-m-d H:i:s', $expiresAt);
+
         $stmt = $this->connection->prepare(
             "INSERT INTO reset_tokens (user_id, token, expires_at, created_at)
-             VALUES (:user_id, :token, FROM_UNIXTIME(:expires_at), NOW())"
+             VALUES (:user_id, :token, :expires_at, NOW())"
         );
         
         return $stmt->execute([
             'user_id' => $userId,
             'token' => $resetToken,
-            'expires_at' => $expiresAt
+            'expires_at' => $expiresAtDateTime
         ]);
     }
     

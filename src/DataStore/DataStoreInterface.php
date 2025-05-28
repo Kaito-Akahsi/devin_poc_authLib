@@ -24,6 +24,17 @@ interface DataStoreInterface
      * @return bool Whether the operation was successful
      */
     public function updateUser(string $userId, string $hashedPassword, string $salt): bool;
+
+
+    /**
+     * Add a new user to the database
+     *
+     * @param string $userId User ID
+     * @param string $hashedPassword Hashed password
+     * @param string $salt Salt used for hashing
+     * @return bool Whether the operation was successful
+     */
+    public function addUser(string $userId, string $hashedPassword, string $salt): bool;
     
     /**
      * Store a password reset token for a user

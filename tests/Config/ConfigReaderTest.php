@@ -2,27 +2,36 @@
 
 namespace AuthLib\Tests\Config;
 
+use AuthLib\Config\ConfigLoader;
 use AuthLib\Config\ConfigReader;
 use PHPUnit\Framework\TestCase;
 
 class ConfigReaderTest extends TestCase
 {
+    private ConfigReader $configReader;
+    
+    protected function setUp(): void
+    {
+        $configLoader = new ConfigLoader();
+        $this->configReader = new ConfigReader($configLoader);
+    }
+    
     public function testGetConfigWithDefaultValue(): void
     {
-        $result = ConfigReader::getConfig('authlib.nonexistent.key', 'default_value');
+        $result = $this->configReader->getConfig('authlib.nonexistent.key', 'default_value');
         
         $this->assertEquals('default_value', $result);
     }
     
     public function testGetConfigByPrefix(): void
     {
-        ConfigReader::clearTestValues();
-        ConfigReader::setTestValue('authlib.test.key1', 'value1');
-        ConfigReader::setTestValue('authlib.test.key2', 'value2');
-        ConfigReader::setTestValue('other.key', 'other_value');
+        $this->configReader->clearTestValues();
+        $this->configReader->setTestValue('authlib.test.key1', 'value1');
+        $this->configReader->setTestValue('authlib.test.key2', 'value2');
+        $this->configReader->setTestValue('other.key', 'other_value');
         
         try {
-            $result = ConfigReader::getConfigByPrefix('authlib.test.');
+            $result = $this->configReader->getConfigByPrefix('authlib.test.');
             
             $this->assertIsArray($result);
             $this->assertArrayHasKey('authlib.test.key1', $result);
@@ -31,7 +40,7 @@ class ConfigReaderTest extends TestCase
             $this->assertEquals('value1', $result['authlib.test.key1']);
             $this->assertEquals('value2', $result['authlib.test.key2']);
         } finally {
-            ConfigReader::clearTestValues();
+            $this->configReader->clearTestValues();
         }
     }
 }

@@ -18,28 +18,24 @@ class ConfigLoader
      * Load configuration from an INI file
      *
      * @param string $filePath Path to INI file
-     * @return bool Whether the file was successfully loaded
+     * @return array Configuration values loaded from the file
      */
-    public function loadFromIniFile(string $filePath): bool
+    public function loadFromIniFile(string $filePath): array
     {
         if (!file_exists($filePath)) {
-            return false;
+            return [];
         }
         
         try {
             $config = parse_ini_file($filePath, false, INI_SCANNER_NORMAL);
             
             if ($config === false) {
-                return false;
+                return [];
             }
         } catch (\Throwable $e) {
-            return false;
+            return [];
         }
         
-        foreach ($config as $key => $value) {
-            ini_set($key, $value);
-        }
-        
-        return true;
+        return $config;
     }
 }

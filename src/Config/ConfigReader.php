@@ -6,14 +6,14 @@ use AuthLib\Auth\ErrorCode;
 use InvalidArgumentException;
 
 /**
- * Class for reading configuration values from php.ini
+ * Class for reading configuration values
  */
 class ConfigReader
 {
     /**
      * @var array Default configuration values
      */
-    private static array $defaults = [
+    private array $defaults = [
         'authlib.datastore.type' => 'memory',
         'authlib.datastore.memory.init_test_data' => '0',
         'authlib.datastore.database.driver' => 'mysql',
@@ -27,37 +27,64 @@ class ConfigReader
     /**
      * @var array Configuration schema for validation
      */
-    private static array $schema = [
+    private array $schema = [
         'authlib.datastore.type' => ['type' => 'enum', 'values' => ['memory', 'database']],
         'authlib.datastore.memory.init_test_data' => ['type' => 'boolean'],
         'authlib.datastore.database.driver' => ['type' => 'enum', 'values' => ['mysql', 'pgsql']],
         'authlib.datastore.database.port' => ['type' => 'integer', 'min' => 1, 'max' => 65535],
         'authlib.datastore.database.auto_connect' => ['type' => 'boolean']
     ];
-
+    
     /**
-     * Get a configuration value from php.ini
+     * @var array Configuration values
+     */
+    private array $config = [];
+    
+    /**
+     * @var array Test values for unit testing
+     */
+    private array $testValues = [];
+    
+    /**
+     * ConfigReader constructor
+     *
+     * @param ConfigLoader $configLoader
+     */
+    public function __construct(array $config)
+    {
+        if ($config !== null) {
+            $this->config = $config;
+        }
+    }
+    
+    /**
+     * Get a configuration value
      *
      * @param string $key Configuration key
      * @param mixed $default Default value if key not found
      * @return mixed Configuration value or default
      */
-    public static function getConfig(string $key, $default = null)
+    public function getConfig(string $key, $default = null)
     {
-        $value = ini_get($key);
+        if (isset($this->testValues[$key])) {
+            return $this->testValues[$key];
+        }
         
-        if ($value === false || $value === '') {
-            if ($default === null && isset(self::$defaults[$key])) {
-                return self::$defaults[$key];
+        if (isset($this->config[$key])) {
+            $value = $this->config[$key];
+            
+            if (isset($this->schema[$key])) {
+                $this->validateConfigValue($key, $value);
             }
-            return $default;
+            
+            return $value;
         }
         
-        if (isset(self::$schema[$key])) {
-            self::validateConfigValue($key, $value);
+        if ($default === null && isset($this->defaults[$key])) {
+            return $this->defaults[$key];
         }
         
-        return $value;
+        return $default;
     }
     
     /**
@@ -66,51 +93,26 @@ class ConfigReader
      * @param string $prefix Configuration key prefix
      * @return array Array of configuration values
      */
-    /**
-     * For testing purposes - allows setting test values
-     */
-    private static $testValues = [];
-    
-    /**
-     * Set a test value for unit testing
-     * 
-     * @param string $key Configuration key
-     * @param mixed $value Configuration value
-     */
-    public static function setTestValue(string $key, $value): void
-    {
-        self::$testValues[$key] = $value;
-    }
-    
-    /**
-     * Clear all test values
-     */
-    public static function clearTestValues(): void
-    {
-        self::$testValues = [];
-    }
-    
-    public static function getConfigByPrefix(string $prefix): array
+    public function getConfigByPrefix(string $prefix): array
     {
         $result = [];
         
-        foreach (self::$testValues as $key => $value) {
+        foreach ($this->testValues as $key => $value) {
             if (strpos($key, $prefix) === 0) {
                 $result[$key] = $value;
             }
         }
         
-        $allConfig = ini_get_all(null, false);
-        foreach ($allConfig as $key => $value) {
+        foreach ($this->config as $key => $value) {
             if (strpos($key, $prefix) === 0) {
-                if (isset(self::$schema[$key])) {
-                    self::validateConfigValue($key, $value);
+                if (isset($this->schema[$key])) {
+                    $this->validateConfigValue($key, $value);
                 }
                 $result[$key] = $value;
             }
         }
         
-        foreach (self::$defaults as $key => $value) {
+        foreach ($this->defaults as $key => $value) {
             if (strpos($key, $prefix) === 0 && !isset($result[$key])) {
                 $result[$key] = $value;
             }
@@ -120,15 +122,34 @@ class ConfigReader
     }
     
     /**
+     * Set a test value for unit testing
+     * 
+     * @param string $key Configuration key
+     * @param mixed $value Configuration value
+     */
+    public function setTestValue(string $key, $value): void
+    {
+        $this->testValues[$key] = $value;
+    }
+    
+    /**
+     * Clear all test values
+     */
+    public function clearTestValues(): void
+    {
+        $this->testValues = [];
+    }
+    
+    /**
      * Validate a configuration value against its schema
      *
      * @param string $key Configuration key
      * @param mixed $value Configuration value
      * @throws InvalidArgumentException If validation fails
      */
-    private static function validateConfigValue(string $key, $value): void
+    private function validateConfigValue(string $key, $value): void
     {
-        $schema = self::$schema[$key];
+        $schema = $this->schema[$key];
         
         switch ($schema['type']) {
             case 'enum':
